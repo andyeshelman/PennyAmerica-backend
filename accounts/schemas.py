@@ -12,11 +12,6 @@ class UserSchemaOut(ModelSchema):
     class Meta:
         model = User
         fields = ["id", "username"]
-
-class CreateSchemaOut(Schema):
-    id: int = Field(..., example=1)
-    class Meta:
-        description = "Schema for the created object output"
         
 class LoginSchema(ModelSchema):
     class Meta:

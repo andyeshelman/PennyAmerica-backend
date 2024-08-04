@@ -12,9 +12,9 @@ class Expense(m.Model):
     name = m.CharField(max_length=255)
     description = m.TextField(blank=True, null=False, default="")
     amount = m.DecimalField(max_digits=10, decimal_places=2)
-    recurring: str | None = m.CharField(
+    recurring = m.CharField(
         max_length=20,
-        choices=Recurrance.choices,
+        choices=Recurrance,
         null=True,
         default=None,
     )
