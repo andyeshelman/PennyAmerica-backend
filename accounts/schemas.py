@@ -11,7 +11,7 @@ class UserSchemaIn(ModelSchema):
 class UserSchemaOut(ModelSchema):
     class Meta:
         model = User
-        fields = ["id", "username"]
+        fields = ['id', 'username']
         
 class LoginSchema(ModelSchema):
     class Meta:
