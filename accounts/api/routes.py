@@ -18,11 +18,11 @@ def login_user(request: HttpRequest, creds: LoginSchema):
     user = authenticate(request, **creds.dict())
     if user is not None:
         login(request, user)
-        return 200, Message(message="Logged in successfully!")
+        return 200, Message("Logged in successfully!")
     else:
-        return 401, Message(message="Username and/or password are invalid...")
+        return 401, Message("Username and/or password are invalid...")
     
 @router.post('/logout', response={200: Message})
 def logout_user(request: HttpRequest):
     logout(request)
-    return 200, Message(message="Logged out successfully!")
+    return 200, Message("Logged out successfully!")

@@ -7,3 +7,8 @@ class CreateSchemaOut(Schema):
         
 class Message(Schema):
     message: str
+    def __init__(self, msg=None, **kw):
+        if msg is not None:
+            super().__init__(message=msg, **kw)
+        else:
+            super().__init__(**kw)
