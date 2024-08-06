@@ -1,4 +1,4 @@
-from ninja import ModelSchema, Schema, Field
+from ninja import ModelSchema
 
 from django.contrib.auth.models import User
 
@@ -11,12 +11,7 @@ class UserSchemaIn(ModelSchema):
 class UserSchemaOut(ModelSchema):
     class Meta:
         model = User
-        fields = ["id", "username"]
-
-class CreateSchemaOut(Schema):
-    id: int = Field(..., example=1)
-    class Meta:
-        description = "Schema for the created object output"
+        fields = ['id', 'username']
         
 class LoginSchema(ModelSchema):
     class Meta:
