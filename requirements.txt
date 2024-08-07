@@ -6,6 +6,7 @@ psycopg==3.2.1
 psycopg-binary==3.2.1
 pydantic==2.8.2
 pydantic_core==2.20.1
+PyJWT==2.9.0
 python-dotenv==1.0.1
 sqlparse==0.5.1
 typing_extensions==4.12.2

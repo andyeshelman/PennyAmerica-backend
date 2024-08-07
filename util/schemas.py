@@ -12,3 +12,11 @@ class Message(Schema):
             super().__init__(message=msg, **kw)
         else:
             super().__init__(**kw)
+            
+class Token(Schema):
+    token: str
+    def __init__(self, tkn=None, **kw):
+        if tkn is not None:
+            super().__init__(token=tkn, **kw)
+        else:
+            super().__init__(**kw)
