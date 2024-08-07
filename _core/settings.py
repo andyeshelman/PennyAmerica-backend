@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-l6ei4y$nw&ibu2a&n42b=b$@g8*qr#n5a*ozpv-#=mxsa1ut2k'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 JWT_SECRET_KEY = 'django-insecure-l6ei4y$nw&ibu2a&n42b=b$@g8*qr#n5a*ozpv-#=mxsa1ut2k'
 
@@ -80,13 +85,23 @@ WSGI_APPLICATION = '_core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pennyamerica',
-        'USER': 'journeyman',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    },
+    # 'fallback': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.getenv('FALLBACK_DB_NAME'),
+    #     'USER': os.getenv('FALLBACK_DB_USER'),
+    #     'PASSWORD': os.getenv('FALLBACK_DB_PASSWORD'),
+    #     'HOST': os.getenv('FALLBACK_DB_HOST'),
+    #     'PORT': os.getenv('FALLBACK_DB_PORT'),
+    # }
 }
+
+# DATABASE_ROUTERS = ['_core.db_router.PrimaryReplicaRouter']
 
 
 # Password validation
