@@ -1,4 +1,4 @@
-from ninja import ModelSchema
+from ninja import Schema, ModelSchema
 
 from django.contrib.auth.models import User
 
@@ -18,3 +18,6 @@ class LoginSchema(ModelSchema):
         description = "Schema for logging a user in"
         model = User
         fields = ['username', 'password']
+
+class BlacklistUserTokensSchema(Schema):
+    user_id: int
