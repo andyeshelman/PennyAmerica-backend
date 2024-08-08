@@ -1,15 +1,41 @@
 from ninja import Router
 from django.http import HttpRequest, JsonResponse
+import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
 from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
+from plaid.model.country_code import CountryCode
+from plaid.model.link_token_create_request import LinkTokenCreateRequest
+from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+
+import time
+from datetime import date, timedelta
 
 from plugins.plaid import client
 from plaids.models import Plaid
 from util.schemas import Token
 
 router = Router(tags=['plaid'])
+
+@router.post('/api/create_link_token')
+def create_link_token(request: HttpRequest):
+    try:
+        request = LinkTokenCreateRequest(
+            products=[Products('transactions')],
+            client_name="Plaid Quickstart",
+            country_codes=[CountryCode('US')],
+            language='en',
+            user=LinkTokenCreateRequestUser(
+                client_user_id=str(request.user.id)
+            )
+        )
+
+    # create link token
+        response = client.link_token_create(request)
+        return JsonResponse(response.to_dict())
+    except plaid.ApiException as e:
+        print(e)
 
 @router.post('/sandbox_public_token', response={200: Token})
 def sandbox_public_token(request: HttpRequest, institution_id: str):
