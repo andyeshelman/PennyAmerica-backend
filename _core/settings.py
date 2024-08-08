@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -42,9 +43,27 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'expenses',
     'accounts',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,23 +102,23 @@ WSGI_APPLICATION = '_core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME_RDS'),
-        'USER': os.getenv('DB_USER_RDS'),
-        'PASSWORD': os.getenv('DB_PASSWORD_RDS'),
-        'HOST': os.getenv('DB_HOST_RDS'),
-        'PORT': os.getenv('DB_PORT_RDS'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     },
-    'fallback': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('FALLBACK_DB_NAME'),
-        'USER': os.getenv('FALLBACK_DB_USER'),
-        'PASSWORD': os.getenv('FALLBACK_DB_PASSWORD'),
-        'HOST': os.getenv('FALLBACK_DB_HOST'),
-        'PORT': os.getenv('FALLBACK_DB_PORT'),
-    }
+    # 'fallback': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.getenv('FALLBACK_DB_NAME'),
+    #     'USER': os.getenv('FALLBACK_DB_USER'),
+    #     'PASSWORD': os.getenv('FALLBACK_DB_PASSWORD'),
+    #     'HOST': os.getenv('FALLBACK_DB_HOST'),
+    #     'PORT': os.getenv('FALLBACK_DB_PORT'),
+    # }
 }
 
-DATABASE_ROUTERS = ['_core.db_router.PrimaryReplicaRouter']
+# DATABASE_ROUTERS = ['_core.db_router.PrimaryReplicaRouter']
 
 
 # Password validation

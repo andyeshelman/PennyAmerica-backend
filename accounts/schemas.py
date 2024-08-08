@@ -6,7 +6,7 @@ class UserSchemaIn(ModelSchema):
     class Meta:
         description = "Schema for creating a new user"
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['first_name', 'last_name', 'username', 'email', 'password']
         
 class UserSchemaOut(ModelSchema):
     class Meta:
