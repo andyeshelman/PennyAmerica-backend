@@ -18,7 +18,7 @@ from util.schemas import Token
 
 router = Router(tags=['plaid'])
 
-@router.post('/api/create_link_token')
+@router.post('/create_link_token')
 def create_link_token(request: HttpRequest):
     try:
         request = LinkTokenCreateRequest(
