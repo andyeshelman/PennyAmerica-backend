@@ -1,6 +1,6 @@
 from ninja import NinjaAPI
+from ninja_jwt.authentication import JWTAuth
 
-from _core.security import JWTAuth
 from accounts.api.routes import router as accounts_router
 from expenses.api.routes import router as expenses_router
 from plaids.api.routes import router as plaid_router
