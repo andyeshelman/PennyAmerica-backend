@@ -35,7 +35,7 @@ def logout_user(request: HttpRequest, refresh_token: RefreshTokenSchema):
 @router.post('/refresh', response={200: PairTokenSchema})
 def token_refresh(request: HttpRequest, refresh_token: RefreshTokenSchema):
     refresh = RefreshToken(refresh_token.refresh)
-    return 200, refresh
+    return 200, PairTokenSchema(refresh)
 
 @router.post('/blacklist_user_tokens', response={frozenset({200, 403, 404, 500}): Message})
 @require_admin
