@@ -4,6 +4,7 @@ from django.http import HttpRequest
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from ninja_jwt.tokens import RefreshToken, BlacklistedToken
+from ninja_jwt.exceptions import TokenError
 
 from accounts.schemas import UserSchemaIn, LoginSchema, BlacklistUserTokensSchema, RefreshTokenSchema, PairTokenSchema
 from util.schemas import CreateSchemaOut, Message
@@ -32,10 +33,16 @@ def logout_user(request: HttpRequest, refresh_token: RefreshTokenSchema):
     token.blacklist()
     return 200, Message("Logged out successfully!")
 
-@router.post('/refresh', response={200: PairTokenSchema})
+@router.post('/refresh', response={200: PairTokenSchema, frozenset({401, 500}): Message})
 def token_refresh(request: HttpRequest, refresh_token: RefreshTokenSchema):
-    refresh = RefreshToken(refresh_token.refresh)
-    return 200, PairTokenSchema(refresh)
+    try:
+        refresh = RefreshToken(refresh_token.refresh)
+        return 200, PairTokenSchema(refresh)
+    except TokenError as e:
+        return 401, Message(str(e))
+    except Exception as e:
+        return 500, Message(str(e))
+    
 
 @router.post('/blacklist_user_tokens', response={frozenset({200, 403, 404, 500}): Message})
 @require_admin
