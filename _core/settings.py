@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'ninja_jwt.token_blacklist',
     'expenses',
     'accounts',
+    'plaids',
 ]
 
 REST_FRAMEWORK = {
