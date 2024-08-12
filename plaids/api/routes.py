@@ -52,7 +52,6 @@ def gen_access_token(request: HttpRequest, public_token: Token):
         public_token=public_token.token
     )
     exchange_response = client.item_public_token_exchange(exchange_request)
-    print(exchange_response)
     Plaid.objects.create(
         access_token=exchange_response['access_token'],
         item_id=exchange_response['item_id'],

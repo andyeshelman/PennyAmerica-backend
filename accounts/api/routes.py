@@ -25,6 +25,7 @@ def login_user(request: HttpRequest, creds: LoginSchema):
     else:
         return 401, Message("Username and/or password are invalid.")
 
+
 @router.post('/logout', response={200: Message})
 def logout_user(request: HttpRequest, refresh_token: RefreshTokenSchema):
     token = RefreshToken(refresh_token.refresh)
@@ -40,6 +41,7 @@ def token_refresh(request: HttpRequest, refresh_token: RefreshTokenSchema):
         return 401, Message(str(e))
     except Exception as e:
         return 500, Message(str(e))
+    
 
 @router.post('/blacklist_user_tokens', response={frozenset({200, 403, 404, 500}): Message})
 @require_admin
