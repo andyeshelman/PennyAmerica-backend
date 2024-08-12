@@ -1,13 +1,9 @@
 import plaid
 from plaid.api import plaid_api
-
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 configuration = plaid.Configuration(
-    host=plaid.Environment.Sandbox,
+    host=getattr(plaid.Environment, os.getenv('PLAID_ENV', 'Sandbox')),
     api_key={
         'clientId': os.getenv('PLAID_CLIENT_ID'),
         'secret': os.getenv('PLAID_SECRET'),
