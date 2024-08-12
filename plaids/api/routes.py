@@ -8,6 +8,7 @@ from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCr
 from plaid.model.country_code import CountryCode
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaids.schemas import SandboxPublicTokenRequest, PublicTokenRequest
 
 import time
 from datetime import date, timedelta
@@ -21,7 +22,16 @@ router = Router(tags=['plaid'])
 @router.post('/create_link_token')
 def create_link_token(request: HttpRequest):
     try:
-        request = LinkTokenCreateRequest(
+        session = request.session
+        existing_token = session.get('link_token')
+        token_timestamp = session.get('link_token_created_at')
+        
+        if existing_token and token_timestamp:
+            token_age = time.time() - token_timestamp
+            if token_age < 30 * 60:  
+                return JsonResponse({"link_token": existing_token}) 
+                  
+        request_data = LinkTokenCreateRequest(
             products=[Products('transactions')],
             client_name="Plaid Quickstart",
             country_codes=[CountryCode('US')],
@@ -30,26 +40,28 @@ def create_link_token(request: HttpRequest):
                 client_user_id=str(request.user.id)
             )
         )
-
-    # create link token
-        response = client.link_token_create(request)
+        response = client.link_token_create(request_data)
+             
+        session['link_token'] = response['link_token']
+        session['link_token_created_at'] = time.time()
+        
         return JsonResponse(response.to_dict())
     except plaid.ApiException as e:
         print(e)
 
 @router.post('/sandbox_public_token', response={200: Token})
-def sandbox_public_token(request: HttpRequest, institution_id: str):
+def sandbox_public_token(request: HttpRequest, body: SandboxPublicTokenRequest):
     pt_request = SandboxPublicTokenCreateRequest(
-        institution_id=institution_id,
+        institution_id=body.institution_id,
         initial_products=[Products('transactions')]
     )
     pt_response = client.sandbox_public_token_create(pt_request)
     return Token(pt_response['public_token'])
 
 @router.post('/gen_access_token')
-def gen_access_token(request: HttpRequest, public_token: Token):
+def gen_access_token(request: HttpRequest, body: PublicTokenRequest):
     exchange_request = ItemPublicTokenExchangeRequest(
-        public_token=public_token.token
+        public_token=body.token
     )
     exchange_response = client.item_public_token_exchange(exchange_request)
     Plaid.objects.create(
@@ -73,6 +85,6 @@ def get_transactions(request: HttpRequest):
                 access_token=access_token,
                 cursor=response['next_cursor']
             )
-            response = client.transactions_sync(req).to_dict()
+            response = client.transactions_sync(req)
             transactions += response['added']
     return JsonResponse({'transactions': [t.to_dict() for t in transactions]})
