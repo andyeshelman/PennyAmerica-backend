@@ -25,7 +25,6 @@ def login_user(request: HttpRequest, creds: LoginSchema):
     else:
         return 401, Message("Username and/or password are invalid.")
 
-
 @router.post('/logout', response={200: Message})
 def logout_user(request: HttpRequest, refresh_token: RefreshTokenSchema):
     token = RefreshToken(refresh_token.refresh)
@@ -41,18 +40,17 @@ def token_refresh(request: HttpRequest, refresh_token: RefreshTokenSchema):
         return 401, Message(str(e))
     except Exception as e:
         return 500, Message(str(e))
-    
 
 @router.post('/blacklist_user_tokens', response={frozenset({200, 403, 404, 500}): Message})
 @require_admin
-def blacklist_user_tokens(request, user_id: int):
+def blacklist_user_tokens(request, payload: BlacklistUserTokensSchema):
     try:
-        target_user = User.objects.get(id=user_id)
+        target_user = User.objects.get(id=payload.user_id)
         tokens = target_user.outstandingtoken_set.all()
         for token in tokens:
-            BlacklistedToken.objects.get_or_create(token_id=token.id)
-        return 200, Message("All tokens for the user have been blacklisted.")
+            BlacklistedToken.objects.get_or_create(token_id=token.id)      
+        return 200, Message("All tokens for the user have been blacklisted.")  
     except User.DoesNotExist:
-        return 404, Message("User not found...")
+        return 404, Message("User not found.")
     except Exception as e:
         return 500, Message(str(e))
