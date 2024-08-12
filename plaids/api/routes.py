@@ -41,7 +41,7 @@ def create_link_token(request: HttpRequest):
             )
         )
         response = client.link_token_create(request_data)
-             
+
         session['link_token'] = response['link_token']
         session['link_token_created_at'] = time.time()
         
@@ -73,6 +73,7 @@ def gen_access_token(request: HttpRequest, body: PublicTokenRequest):
 @router.get('/transactions')
 def get_transactions(request: HttpRequest):
     transactions = []
+
     for item in request.user.plaids.all():
         access_token = item.access_token
         req = TransactionsSyncRequest(
@@ -80,6 +81,7 @@ def get_transactions(request: HttpRequest):
         )
         response = client.transactions_sync(req)
         transactions += response['added']
+        
         while (response['has_more']):
             req = TransactionsSyncRequest(
                 access_token=access_token,
@@ -87,4 +89,5 @@ def get_transactions(request: HttpRequest):
             )
             response = client.transactions_sync(req)
             transactions += response['added']
+
     return JsonResponse({'transactions': [t.to_dict() for t in transactions]})
