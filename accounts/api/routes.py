@@ -1,12 +1,11 @@
-from ninja import Router, errors
-from ninja.responses import Response
+from ninja import Router
 from django.http import HttpRequest
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from ninja_jwt.tokens import RefreshToken, BlacklistedToken
 from ninja_jwt.exceptions import TokenError
 
-from accounts.schemas import UserSchemaIn, LoginSchema, BlacklistUserTokensSchema, RefreshTokenSchema, PairTokenSchema
+from accounts.schemas import UserSchemaIn, LoginSchema, RefreshTokenSchema, PairTokenSchema, UserIDSchema
 from util.schemas import CreateSchemaOut, Message
 from util.security import require_admin
 
@@ -46,9 +45,9 @@ def token_refresh(request: HttpRequest, refresh_token: RefreshTokenSchema):
 
 @router.post('/blacklist_user_tokens', response={frozenset({200, 403, 404, 500}): Message})
 @require_admin
-def blacklist_user_tokens(request, user_id: int):
+def blacklist_user_tokens(request, user_id: UserIDSchema):
     try:
-        target_user = User.objects.get(id=user_id)
+        target_user = User.objects.get(id=user_id.user_id)
         tokens = target_user.outstandingtoken_set.all()
         for token in tokens:
             BlacklistedToken.objects.get_or_create(token_id=token.id)

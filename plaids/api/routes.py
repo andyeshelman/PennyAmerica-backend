@@ -9,9 +9,6 @@ from plaid.model.country_code import CountryCode
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 
-import time
-from datetime import date, timedelta
-
 from plugins.plaid import client
 from plaids.models import Plaid
 from util.schemas import Token
@@ -37,14 +34,14 @@ def create_link_token(request: HttpRequest):
     except plaid.ApiException as e:
         print(e)
 
-@router.post('/sandbox_public_token', response={200: Token})
-def sandbox_public_token(request: HttpRequest, institution_id: str):
-    pt_request = SandboxPublicTokenCreateRequest(
-        institution_id=institution_id,
-        initial_products=[Products('transactions')]
-    )
-    pt_response = client.sandbox_public_token_create(pt_request)
-    return Token(pt_response['public_token'])
+# @router.post('/sandbox_public_token', response={200: Token})
+# def sandbox_public_token(request: HttpRequest, institution_id: str):
+#     pt_request = SandboxPublicTokenCreateRequest(
+#         institution_id=institution_id,
+#         initial_products=[Products('transactions')]
+#     )
+#     pt_response = client.sandbox_public_token_create(pt_request)
+#     return Token(pt_response['public_token'])
 
 @router.post('/gen_access_token')
 def gen_access_token(request: HttpRequest, public_token: Token):
@@ -73,6 +70,6 @@ def get_transactions(request: HttpRequest):
                 access_token=access_token,
                 cursor=response['next_cursor']
             )
-            response = client.transactions_sync(req).to_dict()
+            response = client.transactions_sync(req)
             transactions += response['added']
     return JsonResponse({'transactions': [t.to_dict() for t in transactions]})

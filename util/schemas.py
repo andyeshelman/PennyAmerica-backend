@@ -1,5 +1,9 @@
 from ninja import Schema, Field
 
+from typing import TypeVar, Generic
+
+T = TypeVar('T')
+
 class CreateSchemaOut(Schema):
     id: int = Field(..., example=1)
     class Meta:
@@ -20,3 +24,6 @@ class Token(Schema):
             super().__init__(token=tkn, **kw)
         else:
             super().__init__(**kw)
+            
+class Body(Schema, Generic[T]):
+    value: T

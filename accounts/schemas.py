@@ -36,5 +36,5 @@ class RefreshTokenSchema(Schema):
         else:
             super().__init__(**kw)
 
-class BlacklistUserTokensSchema(Schema):
+class UserIDSchema(Schema):
     user_id: int
