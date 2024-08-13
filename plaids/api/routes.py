@@ -8,6 +8,7 @@ from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCr
 from plaid.model.country_code import CountryCode
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.auth_get_request import AuthGetRequest
 
 from plugins.plaid import client
 from plaids.models import Plaid
@@ -18,8 +19,8 @@ router = Router(tags=['plaid'])
 @router.post('/create_link_token')
 def create_link_token(request: HttpRequest):
     try:
-        request = LinkTokenCreateRequest(
-            products=[Products('transactions')],
+        request_data = LinkTokenCreateRequest(
+            products=[Products('transactions'), Products('auth')],
             client_name="Plaid Quickstart",
             country_codes=[CountryCode('US')],
             language='en',
@@ -29,7 +30,7 @@ def create_link_token(request: HttpRequest):
         )
 
     # create link token
-        response = client.link_token_create(request)
+        response = client.link_token_create(request_data)
         return JsonResponse(response.to_dict())
     except plaid.ApiException as e:
         print(e)
@@ -55,6 +56,16 @@ def gen_access_token(request: HttpRequest, public_token: Token):
         user=request.user
     )
     
+@router.get('/auth')
+def get_auth(request: HttpRequest):
+    auths = []
+    for item in request.user.plaids.all():
+        access_token = item.access_token
+        request_data = AuthGetRequest(access_token=access_token)
+        response = client.auth_get(request_data)
+        auths.append(response.to_dict())
+    return JsonResponse({'auths': auths})
+
 @router.get('/transactions')
 def get_transactions(request: HttpRequest):
     transactions = []
