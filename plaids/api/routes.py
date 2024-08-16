@@ -1,5 +1,7 @@
 from ninja import Router
 from django.http import HttpRequest, JsonResponse
+from ninja.decorators import decorate_view
+from django.views.decorators.cache import cache_page
 import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
@@ -18,6 +20,7 @@ from util.schemas import Token
 router = Router(tags=['plaid'])
 
 @router.post('/create_link_token')
+@decorate_view(cache_page(60 * 30))
 def create_link_token(request: HttpRequest):
     try:
         request_data = LinkTokenCreateRequest(
