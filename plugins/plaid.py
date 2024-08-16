@@ -1,16 +1,12 @@
 import plaid
 from plaid.api import plaid_api
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from django.conf import settings
 
 configuration = plaid.Configuration(
     host=plaid.Environment.Sandbox,
     api_key={
-        'clientId': os.getenv('PLAID_CLIENT_ID'),
-        'secret': os.getenv('PLAID_SECRET'),
+        'clientId': settings.PLAID_CLIENT_ID,
+        'secret': settings.PLAID_SECRET,
     }
 )
 

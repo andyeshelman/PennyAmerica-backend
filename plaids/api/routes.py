@@ -4,11 +4,12 @@ import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
-from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
+#from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.auth_get_request import AuthGetRequest
+from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 
 from plugins.plaid import client
 from plaids.models import Plaid
@@ -55,7 +56,16 @@ def gen_access_token(request: HttpRequest, public_token: Token):
         item_id=exchange_response['item_id'],
         user=request.user
     )
-    
+
+@router.get('/institutions/{ins_id}')
+def get_institution(request: HttpRequest, ins_id: str):
+    request_data = InstitutionsGetByIdRequest(
+        institution_id=ins_id,
+        country_codes=[CountryCode('US')]
+    )
+    response = client.institutions_get_by_id(request_data)
+    return JsonResponse(response.to_dict())
+
 @router.get('/auth')
 def get_auth(request: HttpRequest):
     auths = []

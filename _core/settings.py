@@ -22,17 +22,30 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
 
-ALLOWED_HOSTS = []
+PRODUCTION = os.getenv('PRODUCTION')
 
+if PRODUCTION:
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+    CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS').split(',')
+else:
+    DEBUG = True
+    CORS_ALLOWED_ORIGINS = ['http://localhost:5173',]
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+    },
+}
 
 # Application definition
 
@@ -52,13 +65,7 @@ INSTALLED_APPS = [
 
 NINJA_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'AUTH_HEADER_TYPES': 'Bearer',
 }
 
 MIDDLEWARE = [
@@ -70,10 +77,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
 ]
 
 ROOT_URLCONF = '_core.urls'
@@ -95,29 +98,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = '_core.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    },
-    # 'fallback': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': os.getenv('FALLBACK_DB_NAME'),
-    #     'USER': os.getenv('FALLBACK_DB_USER'),
-    #     'PASSWORD': os.getenv('FALLBACK_DB_PASSWORD'),
-    #     'HOST': os.getenv('FALLBACK_DB_HOST'),
-    #     'PORT': os.getenv('FALLBACK_DB_PORT'),
-    # }
-}
 
 # DATABASE_ROUTERS = ['_core.db_router.PrimaryReplicaRouter']
 
