@@ -1,9 +1,9 @@
 from ninja import NinjaAPI
 from ninja_jwt.authentication import JWTAuth
 
-from accounts.api.routes import router as accounts_router
-from expenses.api.routes import router as expenses_router
-from plaids.api.routes import router as plaid_router
+from accounts.routes import router as accounts_router
+from expenses.routes import router as expenses_router
+from plaids.routes import router as plaid_router
 
 api = NinjaAPI(version="v0", auth=JWTAuth())
 

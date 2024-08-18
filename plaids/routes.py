@@ -15,6 +15,7 @@ from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdReques
 
 from plugins.plaid import client
 from plaids.models import Plaid
+from plaids.schemas import ItemIDSchema
 from util.schemas import Token
 
 router = Router(tags=['plaid'])
@@ -68,6 +69,16 @@ def get_institution(request: HttpRequest, ins_id: str):
     )
     response = client.institutions_get_by_id(request_data)
     return JsonResponse(response.to_dict())
+
+@router.get('/items', response={200: list[ItemIDSchema]})
+def get_items(request: HttpRequest):
+    items = request.user.plaids.all()
+    return 200, items
+
+@router.delete('/items', response={200: tuple[int, dict]})
+def delete_items(request: HttpRequest, item_id: ItemIDSchema):
+    response = request.user.plaids.filter(item_id=item_id.item_id).delete()
+    return 200, response
 
 @router.get('/auth')
 def get_auth(request: HttpRequest):
