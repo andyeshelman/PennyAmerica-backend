@@ -11,7 +11,7 @@ from util.security import require_admin
 
 router = Router(tags=['accounts'])
 
-@router.post('/', response={201: CreateSchemaOut}, auth=None)
+@router.post('/register', response={201: CreateSchemaOut}, auth=None)
 def create_user(request: HttpRequest, user_in: UserSchemaIn):
     user = User.objects.create_user(**user_in.dict())
     return user

@@ -7,7 +7,7 @@ from util.schemas import Message
 
 router = Router(tags=['expenses'])
 
-@router.post('/', response={201: ExpenseSchemaOut, 401: Message})
+@router.post('', response={201: ExpenseSchemaOut, 401: Message})
 def create_expense(request: HttpRequest, expense_in: ExpenseSchemaIn):
     if not request.user.is_authenticated:
         return 401, Message("Must be logged in to create expense.")
@@ -15,7 +15,7 @@ def create_expense(request: HttpRequest, expense_in: ExpenseSchemaIn):
         expense = Expense.objects.create(user=request.user, **expense_in.dict())
         return 201, expense
 
-@router.get('/', response={200: list[ExpenseSchemaOut], 401: Message})
+@router.get('', response={200: list[ExpenseSchemaOut], 401: Message})
 def get_expense_list(request: HttpRequest):
     if not request.user.is_authenticated:
         return 401, Message("Must be logged in to view expenses.")
