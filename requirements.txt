@@ -11,8 +11,10 @@ django-ninja-extra==0.21.2
 django-ninja-jwt==5.3.2
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
+gunicorn==23.0.0
 injector==0.22.0
 nulltype==2.3.1
+packaging==24.1
 plaid-python==24.0.0
 psycopg==3.2.1
 psycopg-binary==3.2.1
