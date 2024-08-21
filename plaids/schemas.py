@@ -69,3 +69,6 @@ class TransactionSchema(Schema):
     transaction_type: str
     unofficial_currency_code: str | None
     website: str | None
+    
+class TransactionResponseSchema(Schema):
+    transactions: list[TransactionSchema]

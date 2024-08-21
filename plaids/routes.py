@@ -10,6 +10,7 @@ from plaid.model.transactions_get_request_options import TransactionsGetRequestO
 from plaid.model.products import Products
 #from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
 from plaid.model.country_code import CountryCode
+from plaid.model.link_token_account_filters import LinkTokenAccountFilters
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 from plaid.model.auth_get_request import AuthGetRequest
@@ -19,7 +20,7 @@ from datetime import date, timedelta
 
 from plugins.plaid import client
 from plaids.models import Plaid
-from plaids.schemas import ItemIDSchema, TransactionSchema
+from plaids.schemas import ItemIDSchema, TransactionResponseSchema
 from util.schemas import Token
 
 router = Router(tags=['plaid'])
@@ -29,13 +30,13 @@ router = Router(tags=['plaid'])
 def create_link_token(request: HttpRequest):
     try:
         request_data = LinkTokenCreateRequest(
-            products=[Products('transactions'), Products('auth')],
-            client_name="Plaid Quickstart",
+            products=[Products('transactions')],
+            client_name="Penny America",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(
                 client_user_id=str(request.user.id)
-            )
+            ),
         )
 
     # create link token
@@ -94,9 +95,9 @@ def get_auth(request: HttpRequest):
         auths.append(response.to_dict())
     return JsonResponse({'auths': auths})
 
-@router.get('/transactions', response={200: dict[str,list[TransactionSchema]]})
+@router.get('/transactions', response={200: TransactionResponseSchema})
 def get_transactions(request: HttpRequest):
-    transactions = {}
+    transactions = []
     for item in request.user.plaids.all():
         request_data = TransactionsGetRequest(
             access_token=item.access_token,
@@ -104,11 +105,12 @@ def get_transactions(request: HttpRequest):
             end_date=date.today(),
         )
         response = client.transactions_get(request_data)
-        transactions[item.item_id] = response['transactions']
-        while len(transactions[item.item_id]) < response['total_transactions']:
+        item_transactions = response['transactions']
+        while len(item_transactions) < response['total_transactions']:
             request_data['options'] = TransactionsGetRequestOptions(
                 offset=len(transactions[item.item_id])
             )
             response = client.transactions_sync(request_data)
-            transactions[item.item_id] += response['transactions']
-    return 200, transactions
+            item_transactions += response['transactions']
+        transactions += item_transactions
+    return 200, {'transactions': transactions}
