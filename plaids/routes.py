@@ -4,7 +4,9 @@ from ninja.decorators import decorate_view
 from django.views.decorators.cache import cache_page
 import plaid
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
-from plaid.model.transactions_sync_request import TransactionsSyncRequest
+#from plaid.model.transactions_sync_request import TransactionsSyncRequest
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from plaid.model.products import Products
 #from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
 from plaid.model.country_code import CountryCode
@@ -13,9 +15,11 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 from plaid.model.auth_get_request import AuthGetRequest
 from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
 
+from datetime import date, timedelta
+
 from plugins.plaid import client
 from plaids.models import Plaid
-from plaids.schemas import ItemIDSchema
+from plaids.schemas import ItemIDSchema, TransactionSchema
 from util.schemas import Token
 
 router = Router(tags=['plaid'])
@@ -90,21 +94,21 @@ def get_auth(request: HttpRequest):
         auths.append(response.to_dict())
     return JsonResponse({'auths': auths})
 
-@router.get('/transactions')
+@router.get('/transactions', response={200: dict[str,list[TransactionSchema]]})
 def get_transactions(request: HttpRequest):
-    transactions = []
+    transactions = {}
     for item in request.user.plaids.all():
-        access_token = item.access_token
-        req = TransactionsSyncRequest(
-            access_token=access_token,
+        request_data = TransactionsGetRequest(
+            access_token=item.access_token,
+            start_date=date.today() - timedelta(days=365),
+            end_date=date.today(),
         )
-        response = client.transactions_sync(req)
-        transactions += response['added']
-        while (response['has_more']):
-            req = TransactionsSyncRequest(
-                access_token=access_token,
-                cursor=response['next_cursor']
+        response = client.transactions_get(request_data)
+        transactions[item.item_id] = response['transactions']
+        while len(transactions[item.item_id]) < response['total_transactions']:
+            request_data['options'] = TransactionsGetRequestOptions(
+                offset=len(transactions[item.item_id])
             )
-            response = client.transactions_sync(req)
-            transactions += response['added']
-    return JsonResponse({'transactions': [t.to_dict() for t in transactions]})
+            response = client.transactions_sync(request_data)
+            transactions[item.item_id] += response['transactions']
+    return 200, transactions
