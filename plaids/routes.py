@@ -8,7 +8,7 @@ from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchan
 from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 from plaid.model.products import Products
-#from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
+from plaid.model.sandbox_public_token_create_request import SandboxPublicTokenCreateRequest
 from plaid.model.country_code import CountryCode
 from plaid.model.link_token_account_filters import LinkTokenAccountFilters
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
@@ -43,16 +43,18 @@ def create_link_token(request: HttpRequest):
         response = client.link_token_create(request_data)
         return JsonResponse(response.to_dict())
     except plaid.ApiException as e:
-        print(e)
+        return 500, str(e)
 
-# @router.post('/sandbox_public_token', response={200: Token})
-# def sandbox_public_token(request: HttpRequest, institution_id: str):
-#     pt_request = SandboxPublicTokenCreateRequest(
-#         institution_id=institution_id,
-#         initial_products=[Products('transactions')]
-#     )
-#     pt_response = client.sandbox_public_token_create(pt_request)
-#     return Token(pt_response['public_token'])
+@router.post('/sandbox_public_token', response={200: Token})
+def sandbox_public_token(request: HttpRequest, institution_id: str):
+    pt_request = SandboxPublicTokenCreateRequest(
+        institution_id=institution_id,
+        initial_products=[Products('transactions')],
+        options={'override_username': 'user_transactions_dynamic',
+            'override_password': 'pass_good'}
+    )
+    pt_response = client.sandbox_public_token_create(pt_request)
+    return Token(pt_response['public_token'])
 
 @router.post('/gen_access_token')
 def gen_access_token(request: HttpRequest, public_token: Token):
