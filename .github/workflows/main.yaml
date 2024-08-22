@@ -35,6 +35,11 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+
+    env:
+      CI_MODE: 1
+      SECRET_KEY: Gate Gate Paragate Parasamgate Bodhi Svaha
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
