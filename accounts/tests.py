@@ -13,7 +13,7 @@ class UserTests(TestCase):
             'email': "alice@example.com"
         }
         
-        response = c.post('/api/v0/accounts/', user_data, 'application/json')
+        response = c.post('/api/v0/accounts/register', user_data, 'application/json')
         self.assertEqual(response.status_code, 201)
 
         response = c.post('/api/v0/accounts/login', {
