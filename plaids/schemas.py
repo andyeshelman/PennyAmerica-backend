@@ -1,5 +1,7 @@
-from ninja import Schema
+from ninja import Schema, Field
+
 import datetime as dt
+from typing import Any
 
 from util.schemas import Lift
 
@@ -72,3 +74,74 @@ class TransactionSchema(Schema):
     
 class TransactionResponseSchema(Schema):
     transactions: list[TransactionSchema]
+
+class LinkTokenResponseSchema(Schema):
+    link_token: str
+    expiration: dt.datetime
+    request_id: str
+
+class SPTCRequestSchema(Schema):
+    institution_id: str = Field(..., example='ins_109508')
+    username: str = Field(..., example='user_transactions_dynamic')
+    password: str = Field(..., example='pass_good')
+
+class InstitutionSchema(Schema):
+    institution_id: str
+    name: str
+    products: list[str]
+    country_codes: list[str]
+    routing_numbers: list[str]
+    oauth: bool
+
+class InstitutionResponseSchema(Schema):
+    institution: InstitutionSchema
+    request_id: str
+
+class AccountBalanceSchema(Schema):
+    available: float | None
+    current: float | None
+    limit: float | None
+    iso_currency_code: str | None
+    unofficial_currency_code: str | None
+    last_updated_datetime: dt.datetime | None = None
+
+class AccountBaseSchema(Schema):
+    account_id: str
+    balances: AccountBalanceSchema
+    mask: str | None
+    name: str
+    official_name: str | None
+    type: str
+    subtype: str | None
+    persistent_account_id: str | None = None
+
+class PlaidErrorSchema(Schema):
+    error_type: Lift[str]
+    error_code: str
+    error_message: str
+    display_message: str | None
+    request_id: str
+    causes: list[Any]
+    status: int | None
+    documentation_url: str
+    suggested_action: str | None
+
+class ItemSchema(Schema):
+    item_id: str
+    webhook: str | None
+    error: PlaidErrorSchema | None
+    available_products: list[str]
+    billed_products: list[str]
+    consent_expiration_time: dt.datetime | None
+    update_type: str
+    institution_id: str | None
+    products: list[str]
+
+class AuthGetResponseSchema(Schema):
+    accounts: list[AccountBaseSchema]
+    numbers: dict
+    item: ItemSchema
+    request_id: str
+
+class AuthResponseSchema(Schema):
+    auths: list[AuthGetResponseSchema]
