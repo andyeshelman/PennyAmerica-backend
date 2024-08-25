@@ -131,7 +131,7 @@ def get_transactions(request: HttpRequest):
                 request_data['options'] = TransactionsGetRequestOptions(
                     offset=len(transactions[item.item_id])
                 )
-                response = client.transactions_sync(request_data)
+                response = client.transactions_get(request_data)
                 item_transactions += response['transactions']
             transactions += item_transactions
         return 200, {'transactions': transactions}
