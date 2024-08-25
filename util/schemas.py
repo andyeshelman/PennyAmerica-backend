@@ -25,5 +25,5 @@ class Token(Schema):
         else:
             super().__init__(**kw)
             
-class Body(Schema, Generic[T]):
+class Lift(Schema, Generic[T]):
     value: T
