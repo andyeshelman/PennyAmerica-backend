@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     'expenses',
     'accounts',
     'plaids',
+    'budgets',
+    'categories',
 ]
 
 NINJA_JWT = {
