@@ -4,3 +4,5 @@ __pycache__
 .env
 .env.development
 .env.production
+/static/
+/staticfiles/
