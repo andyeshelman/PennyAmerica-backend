@@ -3,6 +3,7 @@ from django.http import HttpRequest
 
 from budgets.models import Budget
 from budgets.schemas import BudgetSchemaIn, BudgetSchemaOut, BudgetSchemaPatch
+from categories.models import Category, Subcategory
 from util.schemas import Message
 
 router = Router(tags=['budgets'])
@@ -12,7 +13,11 @@ def create_Budget(request: HttpRequest, budget_in: BudgetSchemaIn):
     if not request.user.is_authenticated:
         return 401, Message("Must be logged in to create budget.")
     else:
-        budget = Budget.objects.create(user=request.user, **budget_in.dict())
+        budget_data = budget_in.dict()
+        budget_data['category'] = Category.objects.get(id=budget_data['category'])
+        if 'subcategory' in budget_data:
+            budget_data['subcategory'] = Subcategory.objects.get(id=budget_data['subcategory'])
+        budget = Budget.objects.create(user=request.user, **budget_data)
         return 201, budget
 
 @router.get('', response={200: list[BudgetSchemaOut], 401: Message})
