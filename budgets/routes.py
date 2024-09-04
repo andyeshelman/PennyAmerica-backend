@@ -15,8 +15,10 @@ def create_Budget(request: HttpRequest, budget_in: BudgetSchemaIn):
     else:
         budget_data = budget_in.dict()
         budget_data['category'] = Category.objects.get(id=budget_data['category'])
-        if 'subcategory' in budget_data:
+        if budget_data.get('subcategory'):
             budget_data['subcategory'] = Subcategory.objects.get(id=budget_data['subcategory'])
+        else:
+            budget_data.pop('subcategory')
         budget = Budget.objects.create(user=request.user, **budget_data)
         return 201, budget
 
