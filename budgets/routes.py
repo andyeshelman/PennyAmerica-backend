@@ -40,7 +40,12 @@ def patch_Budget(request: HttpRequest, budget_id: int, budget_diff: BudgetSchema
     if not request.user == budget.user:
         return 403, Message("Users may only edit their own budgets.")
     for key, value in budget_diff.dict(exclude_unset=True).items():
-        setattr(budget, key, value)
+        if key == 'category':
+            setattr(budget, key, Category.objects.get(id=budget_diff['category']))
+        elif key == 'subcategory':
+            setattr(budget, key, Subcategory.objects.get(id=budget_diff['subcategory']))
+        else:
+            setattr(budget, key, value)
     budget.save()
     return 200, budget
 
