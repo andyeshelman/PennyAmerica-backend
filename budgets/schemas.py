@@ -1,4 +1,4 @@
-from ninja import ModelSchema
+from ninja import ModelSchema, Schema
 
 from budgets.models import Budget
 from accounts.schemas import UserSchemaOut
@@ -15,8 +15,8 @@ class BudgetSchemaOut(ModelSchema):
         model = Budget
         fields = '__all__'
 
-class BudgetSchemaPatch(ModelSchema):
-    class Meta:
-        model = Budget
-        fields = ['category', 'subcategory', 'amount', 'recurring']
-        fields_optional = '__all__'
+class BudgetSchemaPatch(Schema):
+    amount: float | None = None
+    recurring: str | None = None
+    category: int | None = None
+    subcategory: int | None = None
