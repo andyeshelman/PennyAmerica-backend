@@ -3,6 +3,7 @@ from django.http import HttpRequest
 
 from budgets.models import Budget
 from budgets.schemas import BudgetSchemaIn, BudgetSchemaOut, BudgetSchemaPatch
+from categories.models import Category, Subcategory
 from util.schemas import Message
 
 router = Router(tags=['budgets'])
@@ -12,7 +13,13 @@ def create_Budget(request: HttpRequest, budget_in: BudgetSchemaIn):
     if not request.user.is_authenticated:
         return 401, Message("Must be logged in to create budget.")
     else:
-        budget = Budget.objects.create(user=request.user, **budget_in.dict())
+        budget_data = budget_in.dict()
+        budget_data['category'] = Category.objects.get(id=budget_data['category'])
+        if budget_data.get('subcategory'):
+            budget_data['subcategory'] = Subcategory.objects.get(id=budget_data['subcategory'])
+        else:
+            budget_data.pop('subcategory')
+        budget = Budget.objects.create(user=request.user, **budget_data)
         return 201, budget
 
 @router.get('', response={200: list[BudgetSchemaOut], 401: Message})
@@ -32,8 +39,15 @@ def patch_Budget(request: HttpRequest, budget_id: int, budget_diff: BudgetSchema
         return 404, Message(f"Budget with id {budget_id} not found.")
     if not request.user == budget.user:
         return 403, Message("Users may only edit their own budgets.")
-    for key, value in budget_diff.dict(exclude_unset=True).items():
-        setattr(budget, key, value)
+    for key, value in budget_diff.dict().items():
+        if value is None:
+            continue
+        if key == 'category':
+            budget.category = Category.objects.get(id=budget_diff.category)
+        elif key == 'subcategory':
+            budget.subcategory = Subcategory.objects.get(id=budget_diff.subcategory)
+        else:
+            setattr(budget, key, value)
     budget.save()
     return 200, budget
 
